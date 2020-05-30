@@ -8,6 +8,19 @@ from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
+# Helper method
+def paginate_questions(request , all_questions):
+
+    page = request.args.get('page' , 1 , type=int)
+    start = (page-1) * QUESTIONS_PER_PAGE
+    end = start + QUESTIONS_PER_PAGE
+
+    questions = [Question.format() for Question in all_questions]
+    questions_in_page = questions[start:end]
+
+    return questions_in_page
+
+
 def create_app(test_config=None):
   # create and configure the app
   app = Flask(__name__)
@@ -17,9 +30,22 @@ def create_app(test_config=None):
   @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
   '''
 
+  # CORS(app)
+  # cors = CORS(app, resources={r"*/api/*": {"origins": "*"}})
+  cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+
   '''
   @TODO: Use the after_request decorator to set Access-Control-Allow
   '''
+
+ # CORS Headers 
+  @app.after_request
+  def after_request(response):
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
+
 
   '''
   @TODO: 
@@ -27,6 +53,19 @@ def create_app(test_config=None):
   for all available categories.
   '''
 
+  @app.route('/categories' , methods=['GET'])
+  def retrive_categories():
+      all_categories = Category.query.order_by(Category.id).all()
+
+      catgs = {cat.id:cat.type for cat in all_categories}
+      
+      if len(catgs) == 0 :
+        abort(404)
+    
+      return jsonify({
+        'success' : True,
+        'categories' : catgs,
+      })
 
   '''
   @TODO: 
@@ -41,6 +80,28 @@ def create_app(test_config=None):
   Clicking on the page numbers should update the questions. 
   '''
 
+  @app.route('/questions' , methods=['GET'])
+  def retrive_questions():
+
+      all_questions = Question.query.order_by(Question.id).all()
+      questions_in_page = paginate_questions(request , all_questions)
+
+      if len(questions_in_page) == 0 :
+        abort(404)
+
+      all_categories = Category.query.order_by(Category.id).all()
+      catgs = {cat.id:cat.type for cat in all_categories}
+
+
+      return jsonify({
+        'success' : True,
+        'questions' : questions_in_page,
+        'total_questions' : len(all_questions),
+        'categories': catgs,
+        'currentCategory' : None
+      })
+
+
   '''
   @TODO: 
   Create an endpoint to DELETE question using a question ID. 
@@ -48,18 +109,36 @@ def create_app(test_config=None):
   TEST: When you click the trash icon next to a question, the question will be removed.
   This removal will persist in the database and when you refresh the page. 
   '''
+  
+  @app.route('/questions/<int:question_id>', methods=['DELETE'])
+  def delete_question(question_id):
+    try:
+      question = Question.query.filter(Question.id == question_id).one_or_none()
+
+      if question is None:
+        abort(404)
+
+      question.delete()
+
+      return jsonify({
+        'success': True,
+      })
+
+    except:
+      abort(422)
+
+
 
   '''
   @TODO: 
   Create an endpoint to POST a new question, 
-  which will require the question and answer text, 
-  category, and difficulty score.
+  which will require the 
+  question, answer, category and difficulty score.
 
   TEST: When you submit a question on the "Add" tab, 
   the form will clear and the question will appear at the end of the last page
   of the questions list in the "List" tab.  
   '''
-
   '''
   @TODO: 
   Create a POST endpoint to get questions based on a search term. 
@@ -70,6 +149,53 @@ def create_app(test_config=None):
   only question that include that string within their question. 
   Try using the word "title" to start. 
   '''
+
+
+  @app.route('/questions', methods=['POST'])
+  def create_question():
+
+    body = request.get_json()
+
+    new_question = body.get('question', None)
+    new_answer = body.get('answer', None)
+    new_difficulty = body.get('difficulty', None)
+    new_category = body.get('category', None)
+
+    searchTerm = body.get('searchTerm', None)
+
+    try:
+
+      if searchTerm:
+
+        results = Question.query.filter(Question.question.ilike('%{}%'.format(searchTerm)))
+        questions_in_page = paginate_questions(request , results)
+
+        return jsonify({
+          'success' : True,
+          'questions' : questions_in_page,
+          'total_questions' : len(results.all()),
+          'currentCategory' : None
+        })
+
+      else:
+        question = Question(question=new_question, answer=new_answer, difficulty=new_difficulty , category=new_category)
+        question.insert()
+
+        all_questions = Question.query.order_by(Question.id).all()
+        questions_in_page = paginate_questions(request, all_questions)
+
+        return jsonify({
+          'success' : True,
+          'questions' : questions_in_page,
+          'total_questions' : len(all_questions),
+          'currentCategory' : None
+        })
+
+    except:
+      abort(422)
+
+
+
 
   '''
   @TODO: 
