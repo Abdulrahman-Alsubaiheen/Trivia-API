@@ -60,6 +60,8 @@ Setting the `FLASK_APP` variable to `flaskr` directs flask to use the `flaskr` d
 
 ### Error Handling
 Errors are returned as JSON objects in the following format:
+
+#### 400: Bad Request
 ```
 {
     "success": False, 
@@ -67,10 +69,40 @@ Errors are returned as JSON objects in the following format:
     "message": "bad request"
 }
 ```
-The API will return three error types when requests fail:
-- 400: Bad Request
-- 404: Resource Not Found
-- 422: Not Processable 
+#### 404: Resource Not Found
+```
+{
+    "success": False, 
+    "error": 404,
+    "message": "resource not found"
+}
+```
+#### 405: Method not allowed
+```
+{
+    "success": False, 
+    "error": 405,
+    "message": "method not allowed"
+}
+```
+
+#### 422: Not Processable
+```
+{
+    "success": False, 
+    "error": 422,
+    "message": "unprocessable"
+}
+```
+
+#### 500: Internal Server Error
+```
+{
+    "success": False, 
+    "error": 500,
+    "message": "Internal server error"
+}
+```
 
 ### Endpoints 
 

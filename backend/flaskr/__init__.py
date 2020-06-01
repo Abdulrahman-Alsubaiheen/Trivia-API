@@ -8,7 +8,7 @@ from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Helper method ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Helper method ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 
 def paginate_questions(request, all_questions):
@@ -23,7 +23,7 @@ def paginate_questions(request, all_questions):
     return questions_in_page
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Start from here ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Start from here ~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 def create_app(test_config=None):
     # create and configure the app
@@ -33,7 +33,7 @@ def create_app(test_config=None):
     # CORS(app)
     cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-   # CORS Headers
+    # CORS Headers
     @app.after_request
     def after_request(response):
         response.headers.add('Access-Control-Allow-Headers',
@@ -41,7 +41,6 @@ def create_app(test_config=None):
         response.headers.add('Access-Control-Allow-Methods',
                              'GET,PUT,POST,DELETE,OPTIONS')
         return response
-
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ endpoints ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
@@ -58,9 +57,7 @@ def create_app(test_config=None):
             'categories': categories,
         })
 
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-
 
     @app.route('/questions', methods=['GET'])
     def retrive_questions():
@@ -103,9 +100,7 @@ def create_app(test_config=None):
         except BaseException:
             abort(422)
 
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-
 
     @app.route('/questions', methods=['POST'])
     def create_and_search_question():
@@ -156,9 +151,7 @@ def create_app(test_config=None):
         except BaseException:
             abort(422)
 
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-
 
     @app.route('/categories/<int:category_id>/questions', methods=['GET'])
     def retrive_questions_by_category(category_id):
@@ -178,9 +171,7 @@ def create_app(test_config=None):
             'currentCategory': category_id
         })
 
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-
 
     @app.route('/quizzes', methods=['POST'])
     def quizze():
@@ -224,7 +215,6 @@ def create_app(test_config=None):
 
         except BaseException:
             abort(422)
-
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Error Handlers ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
